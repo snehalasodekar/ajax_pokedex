@@ -18,16 +18,10 @@ Make a [Pokédex](https://www.google.com/search?q=pokedex&source=lnms&tbm=isch&s
     * _At least_ 4 "moves"
     * The previous evolution
     * Using CSS make webpage look like pokedex
-    ![pokedex list page](./src/images/readme1.png)
-        - display list of pokemon with image, id, name and it's type (as in image)
-        - onclick of the pokemon move to pokemon detail page
+        - onclick of submit display pokemon details
         - on pokemon page - display all information of pokemon (name, short description,version,height, category, weight, abilities, gender, Type, weaknesses)) as in below image.
     ![pokedex pokemon page](./src/images/readme3.png)
 ## Extended Goals
-    * List Page
-        - Add surprise me button to top of list.
-        - Add sort by box with options( ascending or descending by numbers and A-Z or Z-A order)
-        - Add pagination.
     * Pokemon page
         - On click of versions chnage the short description
         - Add Pokemon evolution section as below image.
