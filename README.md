@@ -31,7 +31,7 @@ Make a [Pokédex](https://www.google.com/search?q=pokedex&source=lnms&tbm=isch&s
     * Pokemon page
         - On click of versions chnage the short description
         - Add Pokemon evolution section as below image.
-        ![pokemon evolution](./src/images/readme4.png)
+   ![pokemon evolution](./src/images/readme4.png)
         - Add Explore more pokemon tab.
 ## Extra Extended Challenge Implementation Goal
 * Couple of pokemon that don't play with the normal rules
