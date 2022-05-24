@@ -32,3 +32,7 @@ Make a [Pokédex](https://www.google.com/search?q=pokedex&source=lnms&tbm=isch&s
 * Add cases for them as,
     - Ditto only has 1 move.
     - Eevee has 6 evolutions.
+#Need to fix
+[ ] display message for the pokemons who don't have evolutions [evolves_from_species]
+[ ] display data of pokemon which has only one evolution
+[ ] clean code
