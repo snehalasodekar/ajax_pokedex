@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <header>
         <h2>Pokemon Data Finder</h2>
      </header>
@@ -21,7 +21,7 @@
             </section>
         </div>
         <div class="row">
-                <section id="searchPokemon">
+                <section id="searchPokemon" class="col">
                     <form action="#" method="post" class="searchForm d-inline-flex py-3 my-3" id="searchFormId">
                         <div class="field mx-2">
                             <label for="pokemonName">Pokemon Name</label>
@@ -32,6 +32,9 @@
                         </div>
                     </form>
                 </section>
+                <div class="actions mx-3 col py-3 my-3">
+                    <button type="button" id="research">Search New Pokemon</button>
+                </div>
             </main>
         </div>
         <div class="row text-center pokePageData">
@@ -42,6 +45,9 @@
             </div>
             <div class="col-md-4 text-start p-3">
                 <div class="detailsPoke" id="pokeDetails">
+                    <div class="poke-id text-secondary">
+                       <h3> <label id="pokeIdLabel"></label></h3>
+                    </div>
                     <div class="poke-name">
                         <label class="p-2"> Name :</label>
                         <span id="pokeName">Pokemon</span>
@@ -70,6 +76,37 @@
                 </div>
             </div>
         </div>
+        <!----><section>
+            <div class="row">
+                <div class="rowHeader">
+                    <h2>Evolutions</h2>
+                </div>
+            </div>
+            <div class="row poke-evolution" id="evolution">
+                <div class="col-md-4">
+                    <div class="row"><img src="./src/images/pokeball.png" alt="poke Evolution" id="pokeEvolutionImg"/></div>
+                    <div class="row"><label id="pokeEvolutionName" class=""></label></div>
+                    <div class="row"><lable id="pokeEvolutionTypes" class=""></lable></div>
+                </div>
+                <!-- <div class="arrow">
+                    <label> > </label>
+                </div> -->
+                <div class="col-md-4">
+
+                    <div class="row"><img src="./src/images/pokeball.png" alt="" id="pokeEvolutionImg1"/></div>
+                    <div class="row"><label id="pokeEvolutionName1" class=""></label></div>
+                    <div class="row"><lable id="pokeEvolutionTypes1" class=""></lable></div>
+                </div>
+                <!-- <div class="arrow">
+                    <label> > </label>
+                </div> -->
+                <div class="col-md-4">
+                    <div class="row"><img src="./src/images/pokeball.png" alt="" id="pokeEvolutionImg2"/></div>
+                    <div class="row"><label id="pokeEvolutionName2" class=""></label></div>
+                    <div class="row"><lable id="pokeEvolutionTypes2" class=""></lable></div>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script src="./src/js/script.js"></script>
