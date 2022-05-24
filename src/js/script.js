@@ -7,7 +7,8 @@
     //'https://pokeapi.co/api/v2/pokemon?limit=151'
     var url = "https://pokeapi.co/api/v2/pokemon/";
     var speciesUrl,basePokemon;
-
+    var showNoEvolutionPokeMsg = document.getElementById("showNoEvolutionPokeMsg");
+    showNoEvolutionPokeMsg.style.display= "none";
     var pokeName = document.getElementById("pokeName");
     var pokeImage = document.getElementById("pokeImage");
     var pokeIdLabel =document.getElementById("pokeIdLabel");
@@ -171,60 +172,64 @@
         let pokeEvolution = await fetch(evolutionUrl);
         let pokeEvolutionDetails = await pokeEvolution.json();
 
-        let pokePreVersion1Details = pokeEvolutionDetails['chain']['evolves_to'][0];
-        let pokePreversion1SpeciesUrl = pokePreVersion1Details['species']['url'];
-         basePokemon = pokeEvolutionDetails['chain']['species']['name'];
+        console.log("Evolves-to = "+pokeEvolutionDetails['chain'].hasOwnProperty('evolves_to'));
+        // if(!pokeEvolutionDetails['chain'].hasOwnProperty('evolves_to')==[]) {
+            alert("hi");
+            let pokePreVersion1Details = pokeEvolutionDetails['chain']['evolves_to'][0];
+            let pokePreversion1SpeciesUrl = pokePreVersion1Details['species']['url'];
+            basePokemon = pokeEvolutionDetails['chain']['species']['name'];
 
-         let BasePokeUrl = url.concat(basePokemon);
-         var basePokemonData = await getPokemonData(BasePokeUrl);
-        console.log("BASE URL + "+basePokemonData['name']);
-        let pokeTypes = '';
-        let basepokeTypes = basePokemonData['types'];
-         let basepokeImg = basePokemonData['sprites']['other']['home']['front_default'];
-         
-         basepokeTypes.forEach((poketypes,index) => {
-            pokeTypes += poketypes['type']['name']+ ' ';
-        }); 
-
-
-        
-         console.log("BASE POKEMON DATA = "+basePokemonData['name']+"\t image = "+basepokeImg+" Base Type = "+pokeTypes);
-      /* */
-      assignVal(pokeEvolutionName,basePokemonData['name']);
-      pokeEvolutionImg.src = basepokeImg;
-      assignVal(pokeEvolutionTypes,pokeTypes);
-      
-         var prePoke1Details = await getPrePokeDetails(pokePreversion1SpeciesUrl); // get previous pokemon name,image and type
-        
-        
-        if(prePoke1Details){
-            let a1,a2,a3;
-            a1 = prePoke1Details.shift();
-            assignVal(pokeEvolutionName1,a1);
-            a2 = prePoke1Details.shift();
-            pokeEvolutionImg1.src = a2;
-            a3 = prePoke1Details.shift();
-            assignVal(pokeEvolutionTypes1,a3);
-        }
-        if(pokePreVersion1Details.hasOwnProperty('evolves_to')){
-            var pokePreversion2SpeciesUrl = pokePreVersion1Details['evolves_to'][0]['species']['url'];
-            var prePoke2Details = await getPrePokeDetails(pokePreversion2SpeciesUrl);
-            console.log("poke version 2 data = "+prePoke2Details);
-            let i=0;
-
-            if(prePoke2Details){            
+            let BasePokeUrl = url.concat(basePokemon);
+            var basePokemonData = await getPokemonData(BasePokeUrl);
             
-                var b1,b2,b3;
-                b1 = prePoke2Details.shift();
-                assignVal(pokeEvolutionName2,b1);
-                b2 = prePoke2Details.shift();
-                pokeEvolutionImg2.src = b2;
-                
-                b3 = prePoke2Details.shift();
-                assignVal(pokeEvolutionTypes2,b3);
+            let pokeTypes = '';
+            let basepokeTypes = basePokemonData['types'];
+            let basepokeImg = basePokemonData['sprites']['other']['home']['front_default'];
+            
+            basepokeTypes.forEach((poketypes,index) => {
+                pokeTypes += poketypes['type']['name']+ ' ';
+            }); 
+
+            assignVal(pokeEvolutionName,basePokemonData['name']);
+            pokeEvolutionImg.src = basepokeImg;
+            assignVal(pokeEvolutionTypes,pokeTypes);
+        
+            var prePoke1Details = await getPrePokeDetails(pokePreversion1SpeciesUrl); // get previous pokemon name,image and type
+            
+            
+            if(prePoke1Details){
+                let a1,a2,a3;
+                a1 = prePoke1Details.shift();
+                assignVal(pokeEvolutionName1,a1);
+                a2 = prePoke1Details.shift();
+                pokeEvolutionImg1.src = a2;
+                a3 = prePoke1Details.shift();
+                assignVal(pokeEvolutionTypes1,a3);
             }
-            
-        }
+            if(pokePreVersion1Details.hasOwnProperty('evolves_to')){
+                var pokePreversion2SpeciesUrl = pokePreVersion1Details['evolves_to'][0]['species']['url'];
+                var prePoke2Details = await getPrePokeDetails(pokePreversion2SpeciesUrl);
+                console.log("poke version 2 data = "+prePoke2Details);
+                let i=0;
+
+                if(prePoke2Details){            
+                
+                    var b1,b2,b3;
+                    b1 = prePoke2Details.shift();
+                    assignVal(pokeEvolutionName2,b1);
+                    b2 = prePoke2Details.shift();
+                    pokeEvolutionImg2.src = b2;
+                    
+                    b3 = prePoke2Details.shift();
+                    assignVal(pokeEvolutionTypes2,b3);
+                }
+                
+            }
+        // }else{
+        //     var noEvolution = document.getElementById("evolution");
+        //     noEvolution.style.display = "none";
+        //     showNoEvolutionPokeMsg.style.display = "block";
+        // }
 
 
     }
@@ -241,7 +246,7 @@
        
         urlString = pokePreversionSpeciesUrl.substring(0, pokePreversionSpeciesUrl.lastIndexOf("/"));
         var final = urlString.substr(urlString.lastIndexOf('/') + 1);
-        console.log("final = "+final);
+       
 
         let finalUrl = url.concat(final);
         let pokePreversionSpeciesUrlData = await fetch(finalUrl);
@@ -255,7 +260,7 @@
             types.forEach((poketypes,index) => {
                 prePokeTypes += poketypes['type']['name']+ ' ';
             }); 
-           console.log("name = "+name +" image = "+image+" types = "+prePokeTypes);
+           //console.log("name = "+name +" image = "+image+" types = "+prePokeTypes);
            pokePreviousSpeciesData.push(name);
            pokePreviousSpeciesData.push(image);
            pokePreviousSpeciesData.push(prePokeTypes);
