@@ -120,10 +120,18 @@
          */
  
     async function getPokemonData(murl){
-        let pokemonDetails = await fetch(murl);
-        let pokeJson = await pokemonDetails.json();
+        const PokemonDataResponse = await fetch(murl);
+
+        if (PokemonDataResponse.status >= 200 && PokemonDataResponse.status <= 299) {
+            const PokemonDataJsonResponse = await PokemonDataResponse.json();
+            return PokemonDataJsonResponse;
+        } else {
+        // Handle errors
+            console.log("No Pokemon Found");
+            console.log(response.status, response.statusText);
+        }
         //getPokeEvolution(pokeJson['id']); //get evolutions of searched pokemon
-        return pokeJson;
+       
     }
     
     /**
@@ -155,116 +163,75 @@
      * @param speciesUrl
      */
      async function getPokeEvolutionUrl(speciesUrl){
-         //console.log(speciesUrl);
+         console.log(speciesUrl);
         let pokeSpeciesUrl = await fetch(speciesUrl);
         let speciesUrlData= await pokeSpeciesUrl.json();
         //console.log("speciesUrlData ="+speciesUrlData['evolution_chain']['url']);
         /** from json of species url we get evolution url send it to another function */
         let evolutionUrl = speciesUrlData['evolution_chain']['url'];
+        console.log("evolutionUrl = "+evolutionUrl);
         getPokeEvolution(evolutionUrl);
      }
 
-    /*
-    * display Evolution from the species url which we get from the pokemon data get after search for pokemon
-    */
-    async function getPokeEvolution(evolutionUrl){ // get prokemon evolution 
-        console.log("evolution Url = "+evolutionUrl);
+    async function getPokeEvolution(evolutionUrl){
         let pokeEvolution = await fetch(evolutionUrl);
         let pokeEvolutionDetails = await pokeEvolution.json();
-
-        console.log("Evolves-to = "+pokeEvolutionDetails['chain'].hasOwnProperty('evolves_to'));
-        // if(!pokeEvolutionDetails['chain'].hasOwnProperty('evolves_to')==[]) {
-            alert("hi");
-            let pokePreVersion1Details = pokeEvolutionDetails['chain']['evolves_to'][0];
-            let pokePreversion1SpeciesUrl = pokePreVersion1Details['species']['url'];
-            basePokemon = pokeEvolutionDetails['chain']['species']['name'];
-
-            let BasePokeUrl = url.concat(basePokemon);
-            var basePokemonData = await getPokemonData(BasePokeUrl);
-            
-            let pokeTypes = '';
-            let basepokeTypes = basePokemonData['types'];
-            let basepokeImg = basePokemonData['sprites']['other']['home']['front_default'];
-            
-            basepokeTypes.forEach((poketypes,index) => {
-                pokeTypes += poketypes['type']['name']+ ' ';
-            }); 
-
-            assignVal(pokeEvolutionName,basePokemonData['name']);
-            pokeEvolutionImg.src = basepokeImg;
-            assignVal(pokeEvolutionTypes,pokeTypes);
         
-            var prePoke1Details = await getPrePokeDetails(pokePreversion1SpeciesUrl); // get previous pokemon name,image and type
+        let pokeEvolutionArr = pokeEvolutionDetails['chain']['evolves_to'];
+        let length1stPokeEvolvesTo = pokeEvolutionDetails['chain']['evolves_to'].length;
+        let evolutionArr = new Array();
+        if(length1stPokeEvolvesTo) { // if a base pokemon has atleast one evolution
+            
+            let basePokemonName = pokeEvolutionDetails['chain']['species']['name'];
+            
+
+           
+            //get pokemon Name, img and type and send it to display evolution data.
+            let pokeUrl = url.concat(basePokemonName);
+            console.log("URL = "+`${url}${pokeEvolutionArr[0].species.name}`);
+            let getBasePokeData = await getPokemonData(pokeUrl);
+            evolutionArr = pushEvolutionData(getBasePokeData,evolutionArr);
+            //
             
             
-            if(prePoke1Details){
-                let a1,a2,a3;
-                a1 = prePoke1Details.shift();
-                assignVal(pokeEvolutionName1,a1);
-                a2 = prePoke1Details.shift();
-                pokeEvolutionImg1.src = a2;
-                a3 = prePoke1Details.shift();
-                assignVal(pokeEvolutionTypes1,a3);
-            }
-            if(pokePreVersion1Details.hasOwnProperty('evolves_to')){
-                var pokePreversion2SpeciesUrl = pokePreVersion1Details['evolves_to'][0]['species']['url'];
-                var prePoke2Details = await getPrePokeDetails(pokePreversion2SpeciesUrl);
-                console.log("poke version 2 data = "+prePoke2Details);
-                let i=0;
 
-                if(prePoke2Details){            
-                
-                    var b1,b2,b3;
-                    b1 = prePoke2Details.shift();
-                    assignVal(pokeEvolutionName2,b1);
-                    b2 = prePoke2Details.shift();
-                    pokeEvolutionImg2.src = b2;
-                    
-                    b3 = prePoke2Details.shift();
-                    assignVal(pokeEvolutionTypes2,b3);
-                }
-                
-            }
-        // }else{
-        //     var noEvolution = document.getElementById("evolution");
-        //     noEvolution.style.display = "none";
-        //     showNoEvolutionPokeMsg.style.display = "block";
-        // }
-
+         }else{ // if pokemon has no evolution
+            //document.getElementById("showNoEvolutionPokeMsg").innerHTML = "This pokemon has no evolution";
+            document.getElementById("showNoEvolutionPokeMsg").style.display = "block";
+            document.getElementById("evolution").style.display="none";
+            console.log("This pokemon has no evolution");
+         }
 
     }
-
     /**
-     * get pokemon name,image and type using id
-     * pokemon id get from species url which get from evolution url
-     * pokemonurl = https://pokeapi.co/api/v2/pokemon/1
-     * species url = https://pokeapi.co/api/v2/pokemon-species/7/
-     * evolution url =  https://pokeapi.co/api/v2/evolution-chain/3/
+     * display Evolutions
      */
-    async function getPrePokeDetails(pokePreversionSpeciesUrl){
-        console.log("inside getPrePokeDetails function =  "+pokePreversionSpeciesUrl);
-       
-        urlString = pokePreversionSpeciesUrl.substring(0, pokePreversionSpeciesUrl.lastIndexOf("/"));
-        var final = urlString.substr(urlString.lastIndexOf('/') + 1);
-       
-
-        let finalUrl = url.concat(final);
-        let pokePreversionSpeciesUrlData = await fetch(finalUrl);
-        let pokePreversionUrlResponse = await pokePreversionSpeciesUrlData.json();
-            console.log("Data Evolution =  "+pokePreversionUrlResponse);
-        let name = pokePreversionUrlResponse['name'];
-        let image = pokePreversionUrlResponse['sprites']['other']['home']['front_default'];
-        let types = pokePreversionUrlResponse['types'];
-        let prePokeTypes='';
-          let pokePreviousSpeciesData = new Array();
-            types.forEach((poketypes,index) => {
-                prePokeTypes += poketypes['type']['name']+ ' ';
-            }); 
-           //console.log("name = "+name +" image = "+image+" types = "+prePokeTypes);
-           pokePreviousSpeciesData.push(name);
-           pokePreviousSpeciesData.push(image);
-           pokePreviousSpeciesData.push(prePokeTypes);
-        return pokePreviousSpeciesData;
+      /*______________Other Functions______________*/
+      const pushEvolutionData = (jsonobj , arr) => {
+          let typeArr = jsonobj.types;
+          let pokeTypes='';
+          typeArr.forEach((poketypes,index) => {
+            pokeTypes += poketypes['type']['name']+ ', ';
+        }); 
+        let newObj = {'name' :  jsonobj.name , 'url': jsonobj.sprites.other.home.front_default, 'types':pokeTypes};
+        console.log(newObj);
+        arr.push(newObj);
+        
+        return arr;
+    }
+    const displayChainOfEvo = (arr) => {
+        let parent = document.querySelector('.container');
+        let row = createRow('pokeDetails');
+        for (let i = 0 ; i < arr.length; i++){
+            let col = createCol('col-12 col-md-4');
+            let name = document.createElement('h4');
+            name.innerHTML = arr[i].name;
+            let img = createImg(arr[i].url);
+            col.appendChild(name);
+            col.appendChild(img);
+            row.appendChild(col);
+        }
+        parent.appendChild(row);
     }
     /**
      * page refresh
