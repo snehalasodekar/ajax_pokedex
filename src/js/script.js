@@ -6,55 +6,48 @@
 (() => {
     //'https://pokeapi.co/api/v2/pokemon?limit=151'
     var url = "https://pokeapi.co/api/v2/pokemon/";
-    var speciesUrl,basePokemon;
-    var showNoEvolutionPokeMsg = document.getElementById("showNoEvolutionPokeMsg");
-    showNoEvolutionPokeMsg.style.display= "none";
-    var pokeName = document.getElementById("pokeName");
-    var pokeImage = document.getElementById("pokeImage");
-    var pokeIdLabel =document.getElementById("pokeIdLabel");
-    var pokeHeight = document.getElementById("pokeHeight");
-    var pokeWeight = document.getElementById("pokeWeight");
-    var pokeAbilitiesLabel = document.getElementById("pokeAbilities");
-    var pokeTypesLabel = document.getElementById("pokeTypes");
-    var pokeMovesLabel = document.getElementById("pokeMoves");
+    document.getElementById("pokemonName").focus();
+    document.getElementById("showNoEvolutionPokeMsg").style.display= "none";
+    document.getElementById("rowHeader").style.display = "none";
 
     /**
      * Pokemon search button click functionality
      * 
      */
     document.querySelector("#submit").addEventListener("click",()=>{
-        var formSearchName = document.getElementById("pokemonName");
-        if(!validate(formSearchName)){
+        if(!validate(document.getElementById("pokemonName"))){
             let getPokemon  = document.querySelector("#pokemonName").value;
+            document.getElementById("pokemonName").disabled = true;
             displayPokemon(`${url+getPokemon}`);
         }else{
-            alert("Search Again");
+            ErrorMessage("Search Again, with correct name or id of pokemon");
             location.reload();
         }
     });
     /**
-         * assign inner html value to html tag
-         */
+     * assign inner html value to html tag
+     */
     var assignVal =(element,value)=>{
         element.innerText = value;
     }
 
    /**
-    * display details of searched pokemon
+    * display details of searched (base) pokemon
    */
 
     async function displayPokemon(url){
         const pokeApiResponse = await getPokemonData(url);
-
-        var abilities = pokeApiResponse['abilities'];
-        var pokeAbilities = '';
-
+        let pokeName = document.getElementById("pokeName");
+        let pokeImage = document.getElementById("pokeImage");
+        let pokeIdLabel =document.getElementById("pokeIdLabel");
+        let pokeHeight = document.getElementById("pokeHeight");
+        let pokeWeight = document.getElementById("pokeWeight");
+        let pokeAbilitiesLabel = document.getElementById("pokeAbilities");
+        let pokeTypesLabel = document.getElementById("pokeTypes");
+        let pokeMovesLabel = document.getElementById("pokeMoves");
         
-        var image = pokeApiResponse['sprites']['other']['home']['front_default'];
-            pokeImage.src = image;
-
-
-        speciesUrl = pokeApiResponse['species']['url'];
+        pokeImage.src = pokeApiResponse['sprites']['other']['home']['front_default'];
+        let speciesUrl = pokeApiResponse['species']['url'];
 
         // using searched pokemon we get it's species url and from that we get it's evolution url
         // from this evolution url we can get evolution of searched pokemon
@@ -71,19 +64,21 @@
         assignVal(pokeIdLabel,"# "+pokeApiResponse['id']);
         assignVal(pokeWeight,pokeApiResponse['weight']);
         assignVal(pokeHeight,pokeApiResponse['height']);
-        assignVal(pokeAbilitiesLabel,pokeAbilities);
+        assignVal(pokeAbilitiesLabel,getAbilities(pokeApiResponse['abilities']));
         assignVal(pokeTypesLabel,getTypes(pokeApiResponse['types']));
         assignVal(pokeMovesLabel,getMoves(pokeApiResponse['moves']));
     } 
 
-/**
+    /**
          * get abilities array
-        
-    const getAbilities = () =>
- abilities.forEach((pokeAbility,index) => {
-    pokeAbilities += pokeAbility['ability']['name'] + ',  ';
-});
- */
+    */    
+    const getAbilities = (pokeAbilities) =>{
+        let ability ='';
+        pokeAbilities.forEach((pokeAbility) => {
+            ability += pokeAbility['ability']['name'] + ', ';
+        });
+        return ability.slice(0, -2);
+    }
 
 
     /**
@@ -96,17 +91,17 @@
                 moves += move['move']['name'] + ', ';
             }
           });
-        return moves;
+        return moves.slice(0, -2);
     }
     /*
     * get types array
     */
     const getTypes = (typesArr) => {
         let types ='';
-        typesArr.forEach((move,index) => {
-            types += typesArr['type']['name']+ ', ';
+        typesArr.forEach((type,index) => {
+            types += type['type']['name']+ ', ';
           });
-        return types;
+        return types.slice(0, -2);
     }
     /**
      * fetch seached pokemon data from api
@@ -120,25 +115,23 @@
             return PokemonDataJsonResponse;
         } else {
         // Handle errors
-            console.log("No Pokemon Found");
+            ErrorMessage("No Pokemon Found");
             console.log(response.status, response.statusText);
-        }
-        //getPokeEvolution(pokeJson['id']); //get evolutions of searched pokemon
-       
+        }       
     }
     
     /**
      * convert string to camel case
-     */
+     *
      function toCamelCase(str) {
         return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index)
         {
             return index == 0 ? word.toLowerCase() : word.toUpperCase();
         }).replace(/\s+/g, '');
     }
-   
+   */
     /**
-     * function input validation
+     * function input validation to check valid string 
      */
      var validate =(formSearchName)=>{
         if (formSearchName.value == "") {
@@ -171,12 +164,9 @@
         let evolutionArr = new Array();
         if(length1stPokeEvolvesTo) { // if a base pokemon has atleast one evolution
             
-            let basePokemonName = pokeEvolutionDetails['chain']['species']['name'];
-            
-
-           
+            document.getElementById("rowHeader").style.display = "block";
             //get pokemon Name, img and type and send it to display evolution data.
-            let pokeUrl = url.concat(basePokemonName);
+            let pokeUrl = url.concat(pokeEvolutionDetails['chain']['species']['name']);
             let getBasePokeData = await getPokemonData(pokeUrl);
 
             evolutionArr = pushEvolutionData(getBasePokeData,evolutionArr);
@@ -186,32 +176,39 @@
                 evolutionArr = pushEvolutionData(eve1,evolutionArr);
                 for(j=0;j<pokeEvolutionArr[i].evolves_to.length;j++){ // get if the first level has another evolution
                     let eve2 = await getPokemonData(`${url+pokeEvolutionArr[i].evolves_to[j].species.name}`);
-                    evolutionArr = pushEvolutionData(eve1,evolutionArr);
+                    evolutionArr = pushEvolutionData(eve2,evolutionArr);
                 }
             }
             
             displayEvolutionPokemon(evolutionArr);
 
          }else{ // if pokemon has no evolution
-            document.getElementById("showNoEvolutionPokeMsg").style.display = "block";
-            console.log("This pokemon has no evolution");
+            ErrorMessage("This pokemon has no evolution");
          }
 
     }
     /**
-     * display Evolutions
+     * Display error messages
      */
-      /*______________Other Functions______________*/
+    const ErrorMessage = (message)=>{
+        document.getElementById("showNoEvolutionPokeMsg").style.display = "block";
+            let eveMsg = document.createElement('h4');
+            eveMsg.classList.add('text-secondary');
+            eveMsg.innerHTML = message;
+            document.getElementById("showNoEvolutionPokeMsg").appendChild(eveMsg);
+        
+    }
+    /**
+     * Add evolution display data of each pokemon to the array
+     */
       const pushEvolutionData = (jsonobj , arr) => {
-          let typeArr = jsonobj.types;
-          let pokeTypes='';
-          typeArr.forEach((poketypes,index) => {
-            pokeTypes += poketypes['type']['name']+ ', ';
-        }); 
-        let newObj = {'name' :  jsonobj.name , 'url': jsonobj.sprites.other.home.front_default, 'types':pokeTypes};
+        let newObj = {'name' :  jsonobj.name , 'url': jsonobj.sprites.other.home.front_default, 'types':getTypes(jsonobj.types)};
         arr.push(newObj);
         return arr;
     }
+    /**
+     * display Evolutions of pokemon by displaying data from array
+     */
     let displayEvolutionPokemon = (evolutionPokeArr) => {
         let parent = document.querySelector('.evolutionSection');
         let row = createRow('pokeDetails');
@@ -221,7 +218,7 @@
             name.innerHTML = evolutionPokeArr[i].name;
             let img = createImg(evolutionPokeArr[i].url);
             let types = document.createElement('h5');
-            types.innerHTML = evolutionPokeArr[i].types.slice(0, -2);
+            types.innerHTML = evolutionPokeArr[i].types;//slice(0, -2)
           
             col.appendChild(img);
             col.appendChild(name);
@@ -232,6 +229,8 @@
     }
     /**
      * create functions for html layout for evolution 
+     * expecting structure will be 
+     * <div class="row pokeDetails"><div class="col-12 col-md-4 text-center"><img><h4><h5></div></div>
      */
     const createRow = (rowClass) => {
         let row = document.createElement('div');
