@@ -18,29 +18,15 @@
     var pokeTypesLabel = document.getElementById("pokeTypes");
     var pokeMovesLabel = document.getElementById("pokeMoves");
 
-    var pokeEvolutionName = document.getElementById("pokeEvolutionName");
-    var pokeEvolutionName1 = document.getElementById("pokeEvolutionName1");
-    var pokeEvolutionName2 = document.getElementById("pokeEvolutionName2");
-
-    var pokeEvolutionImg = document.getElementById("pokeEvolutionImg");
-    var pokeEvolutionImg1 = document.getElementById("pokeEvolutionImg1");
-    var pokeEvolutionImg2 = document.getElementById("pokeEvolutionImg2");
-
-    var pokeEvolutionTypes = document.getElementById("pokeEvolutionTypes");
-    var pokeEvolutionTypes1 = document.getElementById("pokeEvolutionTypes1");
-    var pokeEvolutionTypes2 = document.getElementById("pokeEvolutionTypes2");
-
     /**
      * Pokemon search button click functionality
      * 
      */
     document.querySelector("#submit").addEventListener("click",()=>{
-        console.log("onclick");
         var formSearchName = document.getElementById("pokemonName");
         if(!validate(formSearchName)){
             let getPokemon  = document.querySelector("#pokemonName").value;
-            let murl = url.concat(getPokemon);   
-            displayPokemon(getPokemon,murl);
+            displayPokemon(`${url+getPokemon}`);
         }else{
             alert("Search Again");
             location.reload();
@@ -57,47 +43,22 @@
     * display details of searched pokemon
    */
 
-    async function displayPokemon(getPokemon,murl){
-        const pokeApiResponse = await getPokemonData(murl);
+    async function displayPokemon(url){
+        const pokeApiResponse = await getPokemonData(url);
 
         var abilities = pokeApiResponse['abilities'];
         var pokeAbilities = '';
-        let types = pokeApiResponse['types'];
-        var pokeTypes='';
+
         
         var image = pokeApiResponse['sprites']['other']['home']['front_default'];
             pokeImage.src = image;
-        var pokeMovesArr = pokeApiResponse['moves'];
-        var assignMoves ='';
-        var pokeId = pokeApiResponse['id'];
+
 
         speciesUrl = pokeApiResponse['species']['url'];
+
         // using searched pokemon we get it's species url and from that we get it's evolution url
         // from this evolution url we can get evolution of searched pokemon
         getPokeEvolutionUrl(speciesUrl);
-
-        /**
-         * get moves of pokemon
-         */
-        pokeMovesArr.forEach((move,index) => {
-          if(index > 0 && index < 6){
-            assignMoves += move['move']['name'] + ', ';
-          }
-        });
-
-        /**
-         * get abilities array
-         */
-        abilities.forEach((pokeAbility,index) => {
-            pokeAbilities += pokeAbility['ability']['name'] + ',  ';
-        });
-        
-        /**
-         * get types array
-         */
-        types.forEach((poketypes,index) => {
-            pokeTypes += poketypes['type']['name']+ ', ';
-        }); 
 
         /**
          * display image with specific size
@@ -107,17 +68,49 @@
         }
 
         assignVal(pokeName,pokeApiResponse['name']);
-        assignVal(pokeIdLabel,"# "+pokeId);
+        assignVal(pokeIdLabel,"# "+pokeApiResponse['id']);
         assignVal(pokeWeight,pokeApiResponse['weight']);
         assignVal(pokeHeight,pokeApiResponse['height']);
         assignVal(pokeAbilitiesLabel,pokeAbilities);
-        assignVal(pokeTypesLabel,pokeTypes);
-        assignVal(pokeMovesLabel,assignMoves);
+        assignVal(pokeTypesLabel,getTypes(pokeApiResponse['types']));
+        assignVal(pokeMovesLabel,getMoves(pokeApiResponse['moves']));
     } 
 
+/**
+         * get abilities array
+        
+    const getAbilities = () =>
+ abilities.forEach((pokeAbility,index) => {
+    pokeAbilities += pokeAbility['ability']['name'] + ',  ';
+});
+ */
+
+
     /**
-         * fetch seached pokemon data from api
-         */
+     * get moves of pokemon
+     */
+    const getMoves = (movesArr) => {
+        let moves ='';
+        movesArr.forEach((move,index) => {
+            if(index > 0 && index < 6){
+                moves += move['move']['name'] + ', ';
+            }
+          });
+        return moves;
+    }
+    /*
+    * get types array
+    */
+    const getTypes = (typesArr) => {
+        let types ='';
+        typesArr.forEach((move,index) => {
+            types += typesArr['type']['name']+ ', ';
+          });
+        return types;
+    }
+    /**
+     * fetch seached pokemon data from api
+     */
  
     async function getPokemonData(murl){
         const PokemonDataResponse = await fetch(murl);
@@ -163,14 +156,10 @@
      * @param speciesUrl
      */
      async function getPokeEvolutionUrl(speciesUrl){
-         console.log(speciesUrl);
         let pokeSpeciesUrl = await fetch(speciesUrl);
         let speciesUrlData= await pokeSpeciesUrl.json();
-        //console.log("speciesUrlData ="+speciesUrlData['evolution_chain']['url']);
-        /** from json of species url we get evolution url send it to another function */
-        let evolutionUrl = speciesUrlData['evolution_chain']['url'];
-        console.log("evolutionUrl = "+evolutionUrl);
-        getPokeEvolution(evolutionUrl);
+         /** from json of species url we get evolution url send it to another function */
+        getPokeEvolution(speciesUrlData['evolution_chain']['url']);
      }
 
     async function getPokeEvolution(evolutionUrl){
@@ -188,17 +177,23 @@
            
             //get pokemon Name, img and type and send it to display evolution data.
             let pokeUrl = url.concat(basePokemonName);
-            console.log("URL = "+`${url}${pokeEvolutionArr[0].species.name}`);
             let getBasePokeData = await getPokemonData(pokeUrl);
+
             evolutionArr = pushEvolutionData(getBasePokeData,evolutionArr);
-            //
+
+            for(let i=0;i<pokeEvolutionArr.length;i++){ //for getting first level evolution
+                let eve1 = await getPokemonData(`${url+pokeEvolutionArr[i].species.name}`);
+                evolutionArr = pushEvolutionData(eve1,evolutionArr);
+                for(j=0;j<pokeEvolutionArr[i].evolves_to.length;j++){ // get if the first level has another evolution
+                    let eve2 = await getPokemonData(`${url+pokeEvolutionArr[i].evolves_to[j].species.name}`);
+                    evolutionArr = pushEvolutionData(eve1,evolutionArr);
+                }
+            }
             
-            
+            displayEvolutionPokemon(evolutionArr);
 
          }else{ // if pokemon has no evolution
-            //document.getElementById("showNoEvolutionPokeMsg").innerHTML = "This pokemon has no evolution";
             document.getElementById("showNoEvolutionPokeMsg").style.display = "block";
-            document.getElementById("evolution").style.display="none";
             console.log("This pokemon has no evolution");
          }
 
@@ -214,25 +209,49 @@
             pokeTypes += poketypes['type']['name']+ ', ';
         }); 
         let newObj = {'name' :  jsonobj.name , 'url': jsonobj.sprites.other.home.front_default, 'types':pokeTypes};
-        console.log(newObj);
         arr.push(newObj);
-        
         return arr;
     }
-    const displayChainOfEvo = (arr) => {
-        let parent = document.querySelector('.container');
+    let displayEvolutionPokemon = (evolutionPokeArr) => {
+        let parent = document.querySelector('.evolutionSection');
         let row = createRow('pokeDetails');
-        for (let i = 0 ; i < arr.length; i++){
-            let col = createCol('col-12 col-md-4');
+        for (let i = 0 ; i < evolutionPokeArr.length; i++){
+            let col =createCol('col-12 col-md-4');
             let name = document.createElement('h4');
-            name.innerHTML = arr[i].name;
-            let img = createImg(arr[i].url);
-            col.appendChild(name);
+            name.innerHTML = evolutionPokeArr[i].name;
+            let img = createImg(evolutionPokeArr[i].url);
+            let types = document.createElement('h5');
+            types.innerHTML = evolutionPokeArr[i].types.slice(0, -2);
+          
             col.appendChild(img);
+            col.appendChild(name);
+            col.appendChild(types);
             row.appendChild(col);
         }
         parent.appendChild(row);
     }
+    /**
+     * create functions for html layout for evolution 
+     */
+    const createRow = (rowClass) => {
+        let row = document.createElement('div');
+        row.setAttribute('class', `row align-items-center ${rowClass}`);
+        return row;
+    }
+    const createCol = (columnsClass) => {
+        let col = document.createElement('div');
+        col.setAttribute('class', `${columnsClass} text-center`);
+        return col;
+    }
+    const createImg = (imgPath) => {
+        let img =  document.createElement('img');
+        img.setAttribute('src', imgPath);
+        img.style.width = "200px";
+        img.style.borderRadius  = "50%";
+        img.style.border = "1px solid black";
+        return img;
+    }
+
     /**
      * page refresh
      */
