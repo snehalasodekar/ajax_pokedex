@@ -1,6 +1,6 @@
 # ajax_pokedex
 A javascript Ajax project.
-
+https://snehalchetan.github.io/ajax_pokedex/
 ## Learning Objectives
 * A typical AJAX flow: send asynchronous requests to a remote server and process the results;
 * DOM manipulation: changing the DOM based on results of AJAX-requests.
@@ -33,6 +33,7 @@ Make a [Pokédex](https://www.google.com/search?q=pokedex&source=lnms&tbm=isch&s
     - Ditto only has 1 move.
     - Eevee has 6 evolutions.
 #Need to fix
-[ ] display message for the pokemons who don't have evolutions [evolves_from_species]
-[ ] display data of pokemon which has only one evolution
-[ ] clean code
+[x] display message for the pokemons who don't have evolutions [evolves_from_species]
+[x] display data of pokemon which has only one evolution
+[x] clean code
+[ ] Make code working for darmanitan Pokemon
