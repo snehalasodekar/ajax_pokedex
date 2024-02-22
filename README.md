@@ -1,6 +1,6 @@
 # ajax_pokedex
 A javascript Ajax project.
-https://snehalchetan.github.io/ajax_pokedex/
+https://snehalasodekar.github.io/ajax_pokedex/
 ## Learning Objectives
 * A typical AJAX flow: send asynchronous requests to a remote server and process the results;
 * DOM manipulation: changing the DOM based on results of AJAX-requests.
